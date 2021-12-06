@@ -17,14 +17,12 @@ int weatherAPINotFound[3] = {154, 156, 160};
 //人体传感和光线传感全局变量
 int light = 0;
 int people = 0;
+int showLight = 0;
 
 
 void setLightColor(int R,int G,int B){
     for (int i = 1; i <= 60; i = i + (1)) {
       rgb_display.setPixelColor(i-1, rgb_display.Color(R,G,B));
-//      rgb_display.setPixelColor(i-1, rgb_display.Color(220,120,0));
-//      rgb_display.setPixelColor(i - 1, rgb_display.Color(35, 120, 255));
-//      rgb_display.setPixelColor(i - 1, rgb_display.Color(154, 156, 160));
     }  
 }
 
@@ -32,7 +30,57 @@ void setLightColor(int R,int G,int B){
 void taskOne(void *parameter) {
 
   while(1){
-    rgb_display.clear();
+   
+    light = digitalRead(LIGHTPIN);
+    people = digitalRead(PEOPLEPIN);
+
+    if (light == 1 && people == 1) {
+//      Serial.println("光线传感+ 人体传感");
+    }
+    vTaskDelay(500);
+  }
+
+  vTaskDelete(NULL);
+}
+
+void setup() {
+
+  Serial.begin(115200);
+
+  //wifi setting
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  //lightstrip setting
+  rgb_display.begin();
+  rgb_display.show();
+  
+  
+  pinMode(LIGHTPIN, INPUT);
+  pinMode(PEOPLEPIN, INPUT);
+
+  //子任务设定
+  xTaskCreatePinnedToCore(
+    taskOne,   /* Task function. */
+    "taskOne", /* String with name of task. */
+    15000,     /* Stack size in bytes. */
+    NULL,      /* Parameter passed as input of the task */
+    1,         /* Priority of the task. */
+    NULL,      /* Task handle. */
+    1          /* Task Core. */
+  );
+}
+
+void loop() {
     //  Serial.print("光线传感：");
     //  Serial.print(light);
     //  Serial.print(" ,人体传感：");
@@ -78,62 +126,15 @@ void taskOne(void *parameter) {
       rgb_display.show();
   
       //3分钟关灯
-      vTaskDelay(1000*60*3);
-//      vTaskDelay(2000);
+      delay(1000*60*2);
+//      delay(1000*10);
   
       for (int i = 1; i <= 60; i = i + (1)) {
         rgb_display.setPixelColor(i - 1, rgb_display.Color(0, 0, 0));
       }
       rgb_display.show();
     }
-    vTaskDelay(500);
-  }
 
-  vTaskDelete(NULL);
-}
-
-void setup() {
-
-  Serial.begin(115200);
-
-  //wifi setting
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  //lightstrip setting
-  rgb_display.begin();
-  rgb_display.show();
-  rgb_display.setBrightness(0);
+//    delay(1000);
   
-  
-  pinMode(LIGHTPIN, INPUT);
-  pinMode(PEOPLEPIN, INPUT);
-
-  //子任务设定
-  xTaskCreatePinnedToCore(
-    taskOne,   /* Task function. */
-    "taskOne", /* String with name of task. */
-    15000,     /* Stack size in bytes. */
-    NULL,      /* Parameter passed as input of the task */
-    1,         /* Priority of the task. */
-    NULL,      /* Task handle. */
-    1          /* Task Core. */
-  );
-}
-
-void loop() {
-
-  light = digitalRead(LIGHTPIN);
-  people = digitalRead(PEOPLEPIN);
-  
-  delay(100);
 }
