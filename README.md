@@ -13,7 +13,7 @@
 ## 开发环境🛠️
 1. [arduino 官方IDE ](https://www.arduino.cc/en/software)
 
-## 天气API
+## 天气API🌤️🌈
 根据您的所在地请修改当地可用天气API，
 这里我使用了日本气象厅的open API，通过获取的weatherCode判断
 每日天气。
