@@ -31,7 +31,7 @@ void setLightColor(int R, int G, int B) {
   }
 }
 
-//taskOne：开灯函数
+//taskOne：onLight switch
 void taskOne(void *parameter) {
 
   while (1) {
@@ -39,7 +39,7 @@ void taskOne(void *parameter) {
     people = digitalRead(PEOPLEPIN);
     //光线暗 有人经过切 未开灯状态
     if (light == 1 && people == 1 && lighting == 0 ) {
-      Serial.println("光线传感+ 人体传感");
+//      Serial.println("光线传感+ 人体传感");
       //开灯
       onLight = 1;
       startTime = millis();
@@ -51,6 +51,7 @@ void taskOne(void *parameter) {
 
 //点灯函数
 void startLight() {
+
   HTTPClient http1;
   int httpCode = -1;
   StaticJsonDocument<512> doc;
@@ -108,8 +109,7 @@ void startLight() {
     delay(200);
   }
   rgb_display.show();
-  //亮灯状态设为1
-  lighting = 1;
+
 }
 
 //亮灯函数前 预先亮起，由于请求API需要时间
@@ -158,23 +158,26 @@ void setup() {
 
 void loop() {
 
-  //未亮灯状态点灯，则执行开灯函数
-  if (onLight == 1 && lighting == 0 ) {
-    startLightPrepare();
-    startLight();
-  }
-
   //亮灯状态，检测持续亮灯时长，超过设定
   if (lighting == 1 ) {
     float tempTime = millis();
-    //亮了10s
-    if (tempTime - startTime > 1000 * 10) {
+    //亮了2min
+    if (tempTime - startTime > 1000 * 30) {
       rgb_display.clear();
       rgb_display.show();
       lighting = 0;
       onLight = 0;
     }
+  } else {
+    if (onLight == 1) {
+      //亮灯状态设为1
+      lighting = 1;
+      onLight = 0;
+      //未亮灯状态 点灯，则执行开灯函数
+      startLightPrepare();
+      startLight();
+    }
   }
 
-  delay(1000);
+  delay(500);
 }
