@@ -37,6 +37,7 @@ void taskOne(void *parameter) {
   while (1) {
     light = digitalRead(LIGHTPIN);
     people = digitalRead(PEOPLEPIN);
+//    Serial.println(people);
     //光线暗 有人经过切 未开灯状态
     if (light == 1 && people == 1 && lighting == 0 ) {
 //      Serial.println("光线传感+ 人体传感");
@@ -161,8 +162,17 @@ void loop() {
   //亮灯状态，检测持续亮灯时长，超过设定
   if (lighting == 1 ) {
     float tempTime = millis();
-    //亮了2min
-    if (tempTime - startTime > 1000 * 30) {
+
+    //如果环境明亮，主动关灯
+    if (light == 0 ) {
+      rgb_display.clear();
+      rgb_display.show();
+      lighting = 0;
+      onLight = 0;
+    }
+    
+    //亮了2min,关灯
+    if (tempTime - startTime > 1000 * 60 * 2) {
       rgb_display.clear();
       rgb_display.show();
       lighting = 0;
